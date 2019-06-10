@@ -22,7 +22,13 @@ const promClient = require('prom-client');
 const sendProposalHistogram = new promClient.Histogram({
 	name: 'akc_send_proposal_duration',
 	help: 'Histogram of send proposal duration',
-	labelNames: ['instance']
+	labelNames: ['target']
+});
+
+const sendTransactionHistogram = new promClient.Histogram({
+	name: 'akc_send_transaction_duration',
+	help: 'Histogram of send transaction duration',
+	labelNames: ['target']
 });
 
 const invokeChaincode = async function (peerNames, channelName, chaincodeName, fcn, args, username, org_name) {
@@ -55,14 +61,15 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
 			txId: tx_id
 		};
 
+		const sendProposalHistogramTimer = sendProposalHistogram.startTimer();
 		let results = await channel.sendTransactionProposal(request);
-		console.log('results', results);
+
 		// the returned object has both the endorsement results
 		// and the actual proposal, the proposal will be needed
 		// later when we send a transaction to the orderer
 		const proposalResponses = results[0];
 		const proposal = results[1];
-
+		sendProposalHistogramTimer();
 		// look at the responses to see if they are all are good
 		// response will also include signatures required to be committed
 		let all_good = true;
@@ -133,10 +140,12 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
 				proposalResponses: proposalResponses,
 				proposal: proposal
 			};
+			const sendTransactionTimer = sendTransactionHistogram.startTimer();
 			const sendPromise = channel.sendTransaction(orderer_request);
 			// put the send to the orderer last so that the events get registered and
 			// are ready for the orderering and committing
 			promises.push(sendPromise);
+			sendTransactionTimer();
 			let results = await Promise.all(promises);
 			logger.debug(util.format('------->>> R E S P O N S E : %j', results));
 			let response = results.pop(); //  orderer results are last in the results
