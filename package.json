@@ -1,0 +1,23 @@
+{
+  "name": "akc-node-sdk",
+  "version": "1.0.0",
+  "description": "NodeJS SDK for Akachain",
+  "main": "helper.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Akachain/akc-node-sdk.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Akachain/akc-node-sdk/issues"
+  },
+  "homepage": "https://github.com/Akachain/akc-node-sdk#readme",
+  "dependencies": {
+    "log4js": "^4.3.1",
+    "prom-client": "^11.5.0"
+  }
+}
