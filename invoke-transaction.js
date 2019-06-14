@@ -19,19 +19,28 @@ const helper = require('./helper.js');
 const logger = helper.getLogger('invoke-chaincode');
 const promClient = require('prom-client');
 
+const sendTransactionTotalHistogram = new promClient.Histogram({
+	name: 'akc_send_transaction_total_duration',
+	help: 'Histogram of send transaction total duration',
+	labelNames: ['channel', 'chaincode', 'function']
+});
+
 const sendProposalHistogram = new promClient.Histogram({
 	name: 'akc_send_proposal_duration',
 	help: 'Histogram of send proposal duration',
-	labelNames: ['target', 'channel', 'chaincode']
+	labelNames: ['channel', 'chaincode', 'function']
 });
 
 const sendTransactionHistogram = new promClient.Histogram({
 	name: 'akc_send_transaction_duration',
 	help: 'Histogram of send transaction duration',
-	labelNames: ['target', 'channel', 'chaincode']
+	labelNames: ['channel', 'chaincode', 'function']
 });
 
 const invokeChaincode = async function (peerNames, channelName, chaincodeName, fcn, args, username, org_name) {
+	// start timer send transaction total
+	const sendTransactionTotalHistogramTimer = sendTransactionTotalHistogram.startTimer();
+
 	console.log(peerNames, channelName, chaincodeName, fcn, args, username, org_name);
 	logger.debug(util.format('\n============ invoke transaction on channel %s ============\n', channelName));
 	let error_message = null;
@@ -74,7 +83,7 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
 		const proposal = results[1];
 
 		// end timer
-		sendProposalHistogramTimer({ channel: channelName, chaincode: chaincodeName });
+		sendProposalHistogramTimer({ channel: channelName, chaincode: chaincodeName, function: fcn });
 		// sendProposalHistogramTimer({target: proposalResponses[1].peer.name, channel: channelName, chaincode: chaincodeName});
 
 		// look at the responses to see if they are all are good
@@ -157,7 +166,7 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
 			promises.push(sendPromise);
 
 			// end timer
-			sendTransactionTimer({ channel: channelName, chaincode: chaincodeName });
+			sendTransactionTimer({ channel: channelName, chaincode: chaincodeName, function: fcn });
 
 			let results = await Promise.all(promises);
 			logger.debug(util.format('------->>> R E S P O N S E : %j', results));
@@ -208,6 +217,10 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
 		success: success,
 		message: message
 	};
+
+	// send transaction total timer
+	sendTransactionTotalHistogramTimer({ channel: channelName, chaincode: chaincodeName, function: fcn });
+
 	return response;
 };
 
