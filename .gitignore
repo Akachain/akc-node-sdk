@@ -1,9 +1,11 @@
+<<<<<<< HEAD
 # Logs
 logs
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+package-lock.json
 
 # Runtime data
 pids
@@ -59,3 +61,8 @@ typings/
 
 # next.js build output
 .next
+=======
+/node_modules/*
+/package-lock.json
+/fabric-client-kv-org*
+>>>>>>> a77c1306ee6241f70c2ce5cf2053a9eacf9971de

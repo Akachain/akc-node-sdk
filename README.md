@@ -1,2 +1,3 @@
-# akc-node-sdk
-NodeJS SDK for Akachain 
+## Akachain Node SDK
+
+Dapp node sdk with metrics configuration
