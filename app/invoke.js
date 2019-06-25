@@ -144,7 +144,7 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
 						// so no real need to set here, however for 'disconnect'
 						// the default is false as most event hubs are long running
 						// in this use case we are using it only once
-						{ unregister: true, disconnect: true }
+						{ unregister: true, disconnect: false }
 					);
 					eh.connect();
 				});
