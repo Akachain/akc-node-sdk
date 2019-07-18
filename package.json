@@ -1,7 +1,7 @@
 {
   "name": "akc-node-sdk",
   "author": "hoangnh",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "A node.js SDK",
   "main": "index.js",
   "scripts": {},
@@ -12,7 +12,9 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
+    "asn1.js": "^5.2.0",
     "fabric-client": "~1.4.0",
+    "js-sha256": "^0.9.0",
     "log4js": "^4.4.0",
     "prom-client": "^11.5.0"
   }

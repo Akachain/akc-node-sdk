@@ -2,6 +2,7 @@ const _invoke = require('./app/invoke');
 const _query = require('./app/query');
 const _client = require('./common/client');
 const _logger = require('./common/logger');
+const _crawlBlock = require('./common/crawlBlock');
 
 /**
  * invoke transaction
@@ -118,6 +119,14 @@ const registerUser = async (username, userOrg, isJson) => {
 };
 
 /**
+ * 
+ * @param {*} client 
+ */
+const tlsEnroll = async (client) => {
+  return await _client.tlsEnroll(client);
+};
+
+/**
  * set file path of log file
  * @param {*} file_path 
  */
@@ -133,6 +142,15 @@ const getLogger = (moduleName) => {
   return _logger.getLogger(moduleName);
 };
 
+/**
+ * get data block
+ * @param {*} blockNumberOrHash 
+ * @param {*} option 
+ */
+const crawlBlock = async (blockNumberOrHash, option) => {
+  return await _crawlBlock.crawlBlock(blockNumberOrHash, option);
+};
+
 module.exports = {
   invoke,
   query,
@@ -144,6 +162,8 @@ module.exports = {
   getChannels,
   getClientForOrg,
   registerUser,
+  tlsEnroll,
   setFilePath,
-  getLogger
+  getLogger,
+  crawlBlock
 };

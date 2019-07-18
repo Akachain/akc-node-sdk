@@ -74,5 +74,19 @@ async function registerUser(username, userOrg, isJson) {
   }
 }
 
+async function tlsEnroll(client) {
+  const caClient = client.getCertificateAuthority();
+  const admins = caClient.getRegistrar();
+  const req = {
+    enrollmentID: admins[0].enrollId,
+    enrollmentSecret: admins[0].enrollSecret,
+    profile: 'tls',
+  };
+  const enrollment = await caClient.enroll(req);
+  enrollment.key = enrollment.key.toBytes();
+  return enrollment;
+}
+
 exports.getClientForOrg = getClientForOrg;
 exports.registerUser = registerUser;
+exports.tlsEnroll = tlsEnroll;
