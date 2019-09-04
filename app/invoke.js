@@ -64,7 +64,7 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
     // start timer send transaction
     const sendProposalHistogramTimer = sendProposalHistogram.startTimer();
 
-    let results = await channel.sendTransactionProposal(request);
+    var results = await channel.sendTransactionProposal(request);
 
     // end timer
     sendProposalHistogramTimer({
@@ -249,7 +249,7 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
   }
 
   // build a response to send back to the REST caller
-  var obj = resultsPromise[0][0].response
+  var obj = results[0][0].response
   try {
     obj.payload = JSON.parse(obj.payload.toString('utf8'));
   } catch {
