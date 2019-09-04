@@ -89,7 +89,7 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
         error_message = util.format('invoke chaincode proposal resulted in an error :: %s', proposalResponses[i].toString());
         logger.error(error_message);
         let err = proposalResponses[i];
-        this.Logger.debug('invoke chaincode Error Response' + err);
+        logger.debug('invoke chaincode Error Response' + err);
         let jsonErr = JSON.stringify(err, Object.getOwnPropertyNames(err));
         let objErr = JSON.parse(jsonErr);
         try {
@@ -99,10 +99,10 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
             msg: convertObj.msg,
           };
           errResponses.push(errResponse);
-          this.Logger.error('error: ', convertObj);
+          logger.error('error: ', convertObj);
         } catch (err) {
-          this.Logger.error('error: ', objErr);
-          this.Logger.error('error: ', err);
+          logger.error('error: ', objErr);
+          logger.error('error: ', err);
         }
       } else if (proposalResponses[i].response && proposalResponses[i].response.status === 200) {
         logger.info('invoke chaincode proposal was good');
