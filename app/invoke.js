@@ -67,7 +67,11 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
     let results = await channel.sendTransactionProposal(request);
 
     // end timer
-    sendProposalHistogramTimer({ channel: channelName, chaincode: chaincodeName, function: fcn });
+    sendProposalHistogramTimer({
+      channel: channelName,
+      chaincode: chaincodeName,
+      function: fcn
+    });
 
     // the returned object has both the endorsement results
     // and the actual proposal, the proposal will be needed
@@ -83,12 +87,6 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
       if (proposalResponses[i] instanceof Error) {
         all_good = false;
         error_message = util.format('invoke chaincode proposal resulted in an error :: %s', proposalResponses[i].toString());
-        logger.error(error_message);
-      } else if (proposalResponses[i].response && proposalResponses[i].response.status === 200) {
-        logger.info('invoke chaincode proposal was good');
-      } else {
-        all_good = false;
-        error_message = util.format('invoke chaincode proposal failed for an unknown reason %j', proposalResponses[i]);
         logger.error(error_message);
         let err = proposalResponses[i];
         this.Logger.debug('invoke chaincode Error Response' + err);
@@ -106,6 +104,12 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
           this.Logger.error('error: ', objErr);
           this.Logger.error('error: ', err);
         }
+      } else if (proposalResponses[i].response && proposalResponses[i].response.status === 200) {
+        logger.info('invoke chaincode proposal was good');
+      } else {
+        all_good = false;
+        error_message = util.format('invoke chaincode proposal failed for an unknown reason %j', proposalResponses[i]);
+        logger.error(error_message);
       }
     }
 
@@ -128,29 +132,32 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
             eh.disconnect();
           }, 3000);
           eh.registerTxEvent(tx_id_string, (tx, code, block_num) => {
-            logger.info('The chaincode invoke chaincode transaction has been committed on peer %s', eh.getPeerAddr());
-            logger.info('Transaction %s has status of %s in blocl %s', tx, code, block_num);
-            clearTimeout(event_timeout);
+              logger.info('The chaincode invoke chaincode transaction has been committed on peer %s', eh.getPeerAddr());
+              logger.info('Transaction %s has status of %s in blocl %s', tx, code, block_num);
+              clearTimeout(event_timeout);
 
-            if (code !== 'VALID') {
-              let message = util.format('The invoke chaincode transaction was invalid, code:%s', code);
-              logger.error(message);
-              reject(new Error(message));
-            } else {
-              let message = 'The invoke chaincode transaction was valid.';
-              logger.info(message);
-              resolve(message);
-            }
-          }, (err) => {
-            clearTimeout(event_timeout);
-            logger.error(err);
-            reject(err);
-          },
+              if (code !== 'VALID') {
+                let message = util.format('The invoke chaincode transaction was invalid, code:%s', code);
+                logger.error(message);
+                reject(new Error(message));
+              } else {
+                let message = 'The invoke chaincode transaction was valid.';
+                logger.info(message);
+                resolve(message);
+              }
+            }, (err) => {
+              clearTimeout(event_timeout);
+              logger.error(err);
+              reject(err);
+            },
             // the default for 'unregister' is true for transaction listeners
             // so no real need to set here, however for 'disconnect'
             // the default is false as most event hubs are long running
             // in this use case we are using it only once
-            { unregister: true, disconnect: false }
+            {
+              unregister: true,
+              disconnect: false
+            }
           );
           eh.connect();
         });
@@ -174,7 +181,11 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
       let results = await Promise.all(promises);
 
       // end timer
-      sendTransactionTimer({ channel: channelName, chaincode: chaincodeName, function: fcn });
+      sendTransactionTimer({
+        channel: channelName,
+        chaincode: chaincodeName,
+        function: fcn
+      });
 
       logger.debug(util.format('------->>> R E S P O N S E : %j', results));
       let response = results.pop(); //  orderer results are last in the results
@@ -213,6 +224,7 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
     org_name, channelName, tx_id_string);
   if (error_message) {
     message = util.format('Failed to invoke chaincode. cause:%s', error_message);
+    success = false;
     logger.error(message);
     if (errResponses.length > 0) {
       return {
@@ -223,7 +235,7 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
         Message: errResponses[0].msg,
         MessageDetail: errResponses,
       };
-    }else{
+    } else {
       return {
         Result: {
           Status: 202,
@@ -233,14 +245,12 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
         MessageDetail: errResponses,
       };
     }
-
   } else {
     logger.info(message);
   }
 
   // build a response to send back to the REST caller
   var obj = results[0][0].response
-
   try {
     obj.payload = JSON.parse(obj.payload.toString('utf8'));
   } catch {
@@ -252,12 +262,15 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
       Payload: obj.payload
     },
     Message: "Success",
-    MessageDetail: "Success",
+    MessageDetail: "Success"
   };
 
-
   // send transaction total timer
-  sendTransactionTotalHistogramTimer({ channel: channelName, chaincode: chaincodeName, function: fcn });
+  sendTransactionTotalHistogramTimer({
+    channel: channelName,
+    chaincode: chaincodeName,
+    function: fcn
+  });
 
   return result;
 };
