@@ -132,24 +132,24 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
             eh.disconnect();
           }, 3000);
           eh.registerTxEvent(tx_id_string, (tx, code, block_num) => {
-              logger.info('The chaincode invoke chaincode transaction has been committed on peer %s', eh.getPeerAddr());
-              logger.info('Transaction %s has status of %s in blocl %s', tx, code, block_num);
-              clearTimeout(event_timeout);
+            logger.info('The chaincode invoke chaincode transaction has been committed on peer %s', eh.getPeerAddr());
+            logger.info('Transaction %s has status of %s in blocl %s', tx, code, block_num);
+            clearTimeout(event_timeout);
 
-              if (code !== 'VALID') {
-                let message = util.format('The invoke chaincode transaction was invalid, code:%s', code);
-                logger.error(message);
-                reject(new Error(message));
-              } else {
-                let message = 'The invoke chaincode transaction was valid.';
-                logger.info(message);
-                resolve(message);
-              }
-            }, (err) => {
-              clearTimeout(event_timeout);
-              logger.error(err);
-              reject(err);
-            },
+            if (code !== 'VALID') {
+              let message = util.format('The invoke chaincode transaction was invalid, code:%s', code);
+              logger.error(message);
+              reject(new Error(message));
+            } else {
+              let message = 'The invoke chaincode transaction was valid.';
+              logger.info(message);
+              resolve(message);
+            }
+          }, (err) => {
+            clearTimeout(event_timeout);
+            logger.error(err);
+            reject(err);
+          },
             // the default for 'unregister' is true for transaction listeners
             // so no real need to set here, however for 'disconnect'
             // the default is false as most event hubs are long running
@@ -178,7 +178,7 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
       // start timer send transaction
       const sendTransactionTimer = sendTransactionHistogram.startTimer();
 
-      let results = await Promise.all(promises);
+      var resultsPromise = await Promise.all(promises);
 
       // end timer
       sendTransactionTimer({
@@ -187,8 +187,8 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
         function: fcn
       });
 
-      logger.debug(util.format('------->>> R E S P O N S E : %j', results));
-      let response = results.pop(); //  orderer results are last in the results
+      logger.debug(util.format('------->>> R E S P O N S E : %j', resultsPromise));
+      let response = resultsPromise.pop(); //  orderer results are last in the results
       if (response.status === 'SUCCESS') {
         logger.info('Successfully sent transaction to the orderer.');
       } else {
@@ -197,8 +197,8 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
       }
 
       // now see what each of the event hubs reported
-      for (let i in results) {
-        let event_hub_result = results[i];
+      for (let i in resultsPromise) {
+        let event_hub_result = resultsPromise[i];
         let event_hub = event_hubs[i];
         logger.debug('Event results for event hub :%s', event_hub.getPeerAddr());
         if (typeof event_hub_result === 'string') {
@@ -217,7 +217,6 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
       channel.close();
     }
   }
-
   let success = true;
   let message = util.format(
     'Successfully invoked the chaincode %s to the channel \'%s\' for transaction ID: %s',
@@ -250,7 +249,7 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
   }
 
   // build a response to send back to the REST caller
-  var obj = results[0][0].response
+  var obj = resultsPromise[0][0].response
   try {
     obj.payload = JSON.parse(obj.payload.toString('utf8'));
   } catch {
@@ -273,6 +272,8 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
   });
 
   return result;
+
+
 };
 
 exports.invokeChaincode = invokeChaincode;
