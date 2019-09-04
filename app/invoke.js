@@ -79,6 +79,7 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
     // look at the responses to see if they are all are good
     // response will also include signatures required to be committed
     let all_good = true;
+    var errResponses = [];
     for (const i in proposalResponses) {
       if (proposalResponses[i] instanceof Error) {
         all_good = false;
@@ -90,6 +91,22 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
         all_good = false;
         error_message = util.format('invoke chaincode proposal failed for an unknown reason %j', proposalResponses[i]);
         logger.error(error_message);
+        let err = proposalResponses[i];
+        this.Logger.debug('invoke chaincode Error Response' + err);
+        let jsonErr = JSON.stringify(err, Object.getOwnPropertyNames(err));
+        let objErr = JSON.parse(jsonErr);
+        try {
+          let convertObj = JSON.parse(objErr.message);
+          let errResponse = {
+            status: convertObj.status,
+            msg: convertObj.msg,
+          };
+          errResponses.push(errResponse);
+          this.Logger.error('error: ', convertObj);
+        } catch (err) {
+          this.Logger.error('error: ', objErr);
+          this.Logger.error('error: ', err);
+        }
       }
     }
 
@@ -196,22 +213,53 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
     org_name, channelName, tx_id_string);
   if (error_message) {
     message = util.format('Failed to invoke chaincode. cause:%s', error_message);
-    success = false;
     logger.error(message);
+    if (errResponses.length > 0) {
+      return {
+        Result: {
+          Status: errResponses[0].status,
+          Payload: ""
+        },
+        Message: errResponses[0].msg,
+        MessageDetail: errResponses,
+      };
+    }else{
+      return {
+        Result: {
+          Status: 202,
+          Payload: ""
+        },
+        Message: errResponses,
+        MessageDetail: errResponses,
+      };
+    }
+
   } else {
     logger.info(message);
   }
 
   // build a response to send back to the REST caller
-  const response = {
-    success: success,
-    message: message
+  var obj = results[0][0].response
+
+  try {
+    obj.payload = JSON.parse(obj.payload.toString('utf8'));
+  } catch {
+    obj.payload = obj.payload.toString('utf8');
+  }
+  let result = {
+    Result: {
+      Status: obj.status,
+      Payload: obj.payload
+    },
+    Message: "Success",
+    MessageDetail: "Success",
   };
+
 
   // send transaction total timer
   sendTransactionTotalHistogramTimer({ channel: channelName, chaincode: chaincodeName, function: fcn });
 
-  return response;
+  return result;
 };
 
 exports.invokeChaincode = invokeChaincode;
