@@ -66,19 +66,19 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
 
     let results = await channel.sendTransactionProposal(request);
 
-    // end timer
-    sendProposalHistogramTimer({ channel: channelName, chaincode: chaincodeName, function: fcn });
-
     // the returned object has both the endorsement results
     // and the actual proposal, the proposal will be needed
     // later when we send a transaction to the orderer
     const proposalResponses = results[0];
     const proposal = results[1];
 
+    // end timer
+    sendProposalHistogramTimer({ channel: channelName, chaincode: chaincodeName, function: fcn });
+    // sendProposalHistogramTimer({target: proposalResponses[1].peer.name, channel: channelName, chaincode: chaincodeName});
+
     // look at the responses to see if they are all are good
     // response will also include signatures required to be committed
     let all_good = true;
-    var errResponses = [];
     for (const i in proposalResponses) {
       if (proposalResponses[i] instanceof Error) {
         all_good = false;
@@ -90,22 +90,6 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
         all_good = false;
         error_message = util.format('invoke chaincode proposal failed for an unknown reason %j', proposalResponses[i]);
         logger.error(error_message);
-        let err = proposalResponses[i];
-        this.Logger.debug('invoke chaincode Error Response' + err);
-        let jsonErr = JSON.stringify(err, Object.getOwnPropertyNames(err));
-        let objErr = JSON.parse(jsonErr);
-        try {
-          let convertObj = JSON.parse(objErr.message);
-          let errResponse = {
-            status: convertObj.status,
-            msg: convertObj.msg,
-          };
-          errResponses.push(errResponse);
-          this.Logger.error('error: ', convertObj);
-        } catch (err) {
-          this.Logger.error('error: ', objErr);
-          this.Logger.error('error: ', err);
-        }
       }
     }
 
@@ -163,19 +147,18 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
         proposal: proposal
       };
 
+      // start timer send transaction
+      const sendTransactionTimer = sendTransactionHistogram.startTimer();
+
       const sendPromise = channel.sendTransaction(orderer_request);
       // put the send to the orderer last so that the events get registered and
       // are ready for the orderering and committing
       promises.push(sendPromise);
 
-      // start timer send transaction
-      const sendTransactionTimer = sendTransactionHistogram.startTimer();
-
-      let results = await Promise.all(promises);
-
       // end timer
       sendTransactionTimer({ channel: channelName, chaincode: chaincodeName, function: fcn });
 
+      let results = await Promise.all(promises);
       logger.debug(util.format('------->>> R E S P O N S E : %j', results));
       let response = results.pop(); //  orderer results are last in the results
       if (response.status === 'SUCCESS') {
@@ -213,53 +196,22 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
     org_name, channelName, tx_id_string);
   if (error_message) {
     message = util.format('Failed to invoke chaincode. cause:%s', error_message);
+    success = false;
     logger.error(message);
-    if (errResponses.length > 0) {
-      return {
-        Result: {
-          Status: errResponses[0].status,
-          Payload: ""
-        },
-        Message: errResponses[0].msg,
-        MessageDetail: errResponses,
-      };
-    }else{
-      return {
-        Result: {
-          Status: 202,
-          Payload: ""
-        },
-        Message: errResponses,
-        MessageDetail: errResponses,
-      };
-    }
-
   } else {
     logger.info(message);
   }
 
   // build a response to send back to the REST caller
-  var obj = results[0][0].response
-
-  try {
-    obj.payload = JSON.parse(obj.payload.toString('utf8'));
-  } catch {
-    obj.payload = obj.payload.toString('utf8');
-  }
-  let result = {
-    Result: {
-      Status: obj.status,
-      Payload: obj.payload
-    },
-    Message: "Success",
-    MessageDetail: "Success",
+  const response = {
+    success: success,
+    message: message
   };
-
 
   // send transaction total timer
   sendTransactionTotalHistogramTimer({ channel: channelName, chaincode: chaincodeName, function: fcn });
 
-  return result;
+  return response;
 };
 
 exports.invokeChaincode = invokeChaincode;
