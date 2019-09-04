@@ -66,15 +66,14 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
 
     let results = await channel.sendTransactionProposal(request);
 
+    // end timer
+    sendProposalHistogramTimer({ channel: channelName, chaincode: chaincodeName, function: fcn });
+
     // the returned object has both the endorsement results
     // and the actual proposal, the proposal will be needed
     // later when we send a transaction to the orderer
     const proposalResponses = results[0];
     const proposal = results[1];
-
-    // end timer
-    sendProposalHistogramTimer({ channel: channelName, chaincode: chaincodeName, function: fcn });
-    // sendProposalHistogramTimer({target: proposalResponses[1].peer.name, channel: channelName, chaincode: chaincodeName});
 
     // look at the responses to see if they are all are good
     // response will also include signatures required to be committed
@@ -164,18 +163,19 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
         proposal: proposal
       };
 
-      // start timer send transaction
-      const sendTransactionTimer = sendTransactionHistogram.startTimer();
-
       const sendPromise = channel.sendTransaction(orderer_request);
       // put the send to the orderer last so that the events get registered and
       // are ready for the orderering and committing
       promises.push(sendPromise);
 
+      // start timer send transaction
+      const sendTransactionTimer = sendTransactionHistogram.startTimer();
+
+      let results = await Promise.all(promises);
+
       // end timer
       sendTransactionTimer({ channel: channelName, chaincode: chaincodeName, function: fcn });
 
-      let results = await Promise.all(promises);
       logger.debug(util.format('------->>> R E S P O N S E : %j', results));
       let response = results.pop(); //  orderer results are last in the results
       if (response.status === 'SUCCESS') {
