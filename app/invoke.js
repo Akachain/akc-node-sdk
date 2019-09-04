@@ -4,10 +4,11 @@
  */
 'use strict';
 const util = require('util');
-const helper = require('../common/client');
+// const helper = require('../common/client');
 const loggerConfig = require('../common/logger');
 const logger = loggerConfig.getLogger('invoke-chaincode');
 const promClient = require('prom-client');
+const common = require('../common/common');
 
 const sendTransactionTotalHistogram = new promClient.Histogram({
   name: 'akc_send_transaction_total_duration',
@@ -39,9 +40,9 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
   let channel = null;
   try {
     // first setup the client for this org
-    client = await helper.getClientForOrg(org_name, username);
+    client = await common.getClient(org_name, username);
     logger.debug('Successfully got the fabric client for the organization "%s"', org_name);
-    channel = client.getChannel(channelName);
+    channel = await common.getChannel(org_name, username, channelName);
     if (!channel) {
       let message = util.format('Channel %s was not defined in the connection profile', channelName);
       logger.error(message);
@@ -110,7 +111,7 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
             let message = 'REQUEST_TIMEOUT:' + eh.getPeerAddr();
             logger.error(message);
             eh.disconnect();
-          }, 3000);
+          }, 30000);
           eh.registerTxEvent(tx_id_string, (tx, code, block_num) => {
             logger.info('The chaincode invoke chaincode transaction has been committed on peer %s', eh.getPeerAddr());
             logger.info('Transaction %s has status of %s in blocl %s', tx, code, block_num);

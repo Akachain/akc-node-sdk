@@ -6,34 +6,33 @@ var util = require('util');
 const helper = require('../common/client');
 const loggerConfig = require('../common/logger');
 const logger = loggerConfig.getLogger('query-chaincode');
-var fabricClient = require('fabric-client');
+const common = require('../common/common');
 
 // queryChaincode modified
-var queryChaincode = async function (channelName, chaincodeName, args, fcn, org_name) {
-  const client = await fabricClient.getClientForOrg(org_name, org_name);
-  const channel = client.getChannel(channelName);
-  if (!channel) {
-    const message = util.format('Channel %s was not defined in the connection profile', channelName);
-    logger.error(message);
-    throw new Error(message);
+var queryChaincode = async function (org_name, channelName, request) {
+  try {
+    // first setup the client for this or
+    const channel = await common.getChannel(org_name, org_name, channelName);
+    if (!channel) {
+      let message = util.format('Channel %s was not defined in the connection profile', channelName);
+      logger.error(message);
+      throw new Error(message);
+    }
+    let response_payloads = await channel.queryByChaincode(request);
+    if (response_payloads) {
+      for (let i = 0; i < response_payloads.length; i++) {
+        logger.debug('------->>> R E S P O N S E : ' + response_payloads[i].toString('utf8'));
+        return response_payloads[i].toString('utf8');
+
+      }
+    } else {
+      logger.error('response_payloads is null');
+      return 'response_payloads is null';
+    }
+  } catch (error) {
+    logger.error('Failed to query due to error: ' + error.stack ? error.stack : error);
+    return error.toString();
   }
-
-  const targets = client.getPeersForOrg();
-  const txId = client.newTransactionID();
-  logger.debug(util.format('Sending transaction "%j"', txId));
-
-  // send proposal to endorser
-  const request = {
-    targets,
-    chaincodeName,
-    fcn,
-    args,
-    txId,
-    chainId: channelName,
-  };
-  const resultQuery = await queryLib.Query(request, channel);
-  logger.debug('chaincode response => typeof resultQuery:', typeof resultQuery, '; value: ', resultQuery);
-  return resultQuery;
 };
 var getBlockByNumber = async function (peer, channelName, blockNumber, username, org_name) {
   try {
