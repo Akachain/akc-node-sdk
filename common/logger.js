@@ -40,7 +40,7 @@ const setFilePath = (file_path) => {
  */
 const getLogger = (moduleName) => {
   logger = log4js.getLogger(moduleName);
-  logger.level = 'debug';
+  logger.level = 'info';
   return logger;
 };
 
