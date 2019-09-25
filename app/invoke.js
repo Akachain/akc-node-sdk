@@ -52,9 +52,12 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
     // will need the transaction ID string for the event registration later
     tx_id_string = tx_id.getTransactionID();
 
+    // we want to choose the endorsing peer in sequence 
+    let round = 0;
+
     // send proposal to endorser
     const request = {
-      targets: peerNames,
+      targets: peerNames[ ++ round % peerNames.length],
       chaincodeId: chaincodeName,
       fcn: fcn,
       args: args,
@@ -65,7 +68,10 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
     // start timer send transaction
     const sendProposalHistogramTimer = sendProposalHistogram.startTimer();
 
+    var hrstart = process.hrtime() 
     var results = await channel.sendTransactionProposal(request);
+    var hrend = process.hrtime(hrstart)
+    logger.info('Send proposal time to %s (hr): %ds %dms', results[0][0].peer.name, hrend[0], hrend[1] / 1000000)
 
     // end timer
     sendProposalHistogramTimer({
@@ -177,9 +183,11 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
       promises.push(sendPromise);
 
       // start timer send transaction
+      var txstart = process.hrtime();
       const sendTransactionTimer = sendTransactionHistogram.startTimer();
-
       var resultsPromise = await Promise.all(promises);
+      var txend = process.hrtime(txstart);
+      logger.info('Send tx time (hr): %ds %dms', txend[0], txend[1] / 1000000);
 
       // end timer
       sendTransactionTimer({
