@@ -57,7 +57,7 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
 
     // send proposal to endorser
     const request = {
-      targets: peerNames[ ++ round % peerNames.length],
+      targets: peerNames,
       chaincodeId: chaincodeName,
       fcn: fcn,
       args: args,
