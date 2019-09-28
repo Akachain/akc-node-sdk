@@ -29,6 +29,8 @@ const sendTransactionHistogram = new promClient.Histogram({
 });
 
 const invokeChaincode = async function (peerNames, channelName, chaincodeName, fcn, args, username, org_name) {
+  var getClientStart = process.hrtime();
+
   // start timer send transaction total
   const sendTransactionTotalHistogramTimer = sendTransactionTotalHistogram.startTimer();
 
@@ -68,6 +70,9 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
     // start timer send transaction
     const sendProposalHistogramTimer = sendProposalHistogram.startTimer();
 
+    var getClientEnd = process.hrtime(getClientStart)
+    logger.info('Setup client time (hr): %ds %dms', getClientEnd[0], getClientEnd[1] / 1000000)
+
     var hrstart = process.hrtime() 
     var results = await channel.sendTransactionProposal(request);
     var hrend = process.hrtime(hrstart)
@@ -79,6 +84,8 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
       chaincode: chaincodeName,
       function: fcn
     });
+
+    var checkProposalStart = process.hrtime() 
 
     // the returned object has both the endorsement results
     // and the actual proposal, the proposal will be needed
@@ -181,6 +188,9 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
       // put the send to the orderer last so that the events get registered and
       // are ready for the orderering and committing
       promises.push(sendPromise);
+
+      var checkProposalEnd = process.hrtime(checkProposalStart);
+      logger.info('Check proposal time: %ds %dms', checkProposalEnd[0], checkProposalEnd[1] / 1000000);
 
       // start timer send transaction
       var txstart = process.hrtime();
