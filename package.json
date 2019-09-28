@@ -1,7 +1,7 @@
 {
   "name": "akc-node-sdk",
   "author": "hoangnh",
-  "version": "1.2.1b",
+  "version": "1.2.1c",
   "description": "A node.js SDK",
   "main": "index.js",
   "scripts": {},
