@@ -29,8 +29,6 @@ const sendTransactionHistogram = new promClient.Histogram({
 });
 
 const invokeChaincode = async function (peerNames, channelName, chaincodeName, fcn, args, username, org_name) {
-  var getClientStart = process.hrtime();
-
   // start timer send transaction total
   const sendTransactionTotalHistogramTimer = sendTransactionTotalHistogram.startTimer();
 
@@ -42,15 +40,30 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
   let channel = null;
   try {
     // first setup the client for this org
+
+    var getClientStart = process.hrtime();
     client = await common.getClient(org_name, username)
+    var getClientEnd = process.hrtime(getClientStart)
+    logger.info('getClient time (hr): %ds %dms', getClientEnd[0], getClientEnd[1] / 1000000)
+
+    
     logger.debug('Successfully got the fabric client for the organization "%s"', org_name);
+    var getChannelStart = process.hrtime();
     channel = await common.getChannel(org_name, username, channelName);
+    var getChannelEnd = process.hrtime(getChannelStart);
+    logger.info('getChannel time (hr): %ds %dms', getChannelEnd[0], getChannelEnd[1] / 1000000)
+
     if (!channel) {
       let message = util.format('Channel %s was not defined in the connection profile', channelName);
       logger.error(message);
       throw new Error(message);
     }
+
+    var newTransactionIDStart = process.hrtime();
     const tx_id = client.newTransactionID();
+    var newTransactionIDEnd = process.hrtime(newTransactionIDStart);
+    logger.info('newTransactionID time (hr): %ds %dms', newTransactionIDEnd[0], newTransactionIDEnd[1] / 1000000)
+
     // will need the transaction ID string for the event registration later
     tx_id_string = tx_id.getTransactionID();
 
@@ -69,9 +82,6 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
 
     // start timer send transaction
     const sendProposalHistogramTimer = sendProposalHistogram.startTimer();
-
-    var getClientEnd = process.hrtime(getClientStart)
-    logger.info('Setup client time (hr): %ds %dms', getClientEnd[0], getClientEnd[1] / 1000000)
 
     var hrstart = process.hrtime() 
     var results = await channel.sendTransactionProposal(request);
