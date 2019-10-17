@@ -28,7 +28,22 @@ const sendTransactionHistogram = new promClient.Histogram({
   labelNames: ['channel', 'chaincode', 'function']
 });
 
+const errorRequestCounter = new promClient.Counter({
+  name: 'akc_error_request_counter',
+  help: 'Counter of error requests',
+  labelNames: ['channel', 'chaincode', 'function']
+});
+
+const requestCounter = new promClient.Counter({
+  name: 'akc_request_counter',
+  help: 'Counter of requests',
+  labelNames: ['channel', 'chaincode', 'function']
+});
+
 const invokeChaincode = async function (peerNames, channelName, chaincodeName, fcn, args, username, org_name) {
+  // increase req counter
+  requestCounter.inc();
+
   // start timer send transaction total
   const sendTransactionTotalHistogramTimer = sendTransactionTotalHistogram.startTimer();
 
@@ -46,7 +61,7 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
     var getClientEnd = process.hrtime(getClientStart)
     logger.info('getClient time (hr): %ds %dms', getClientEnd[0], getClientEnd[1] / 1000000)
 
-    
+
     logger.debug('Successfully got the fabric client for the organization "%s"', org_name);
     var getChannelStart = process.hrtime();
     channel = await common.getChannel(org_name, username, channelName);
@@ -83,7 +98,7 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
     // start timer send transaction
     const sendProposalHistogramTimer = sendProposalHistogram.startTimer();
 
-    var hrstart = process.hrtime() 
+    var hrstart = process.hrtime()
     var results = await channel.sendTransactionProposal(request);
     var hrend = process.hrtime(hrstart)
     logger.info('Send proposal time to %s (hr): %ds %dms', results[0][0].peer.name, hrend[0], hrend[1] / 1000000)
@@ -95,7 +110,7 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
       function: fcn
     });
 
-    var checkProposalStart = process.hrtime() 
+    var checkProposalStart = process.hrtime()
 
     // the returned object has both the endorsement results
     // and the actual proposal, the proposal will be needed
@@ -109,6 +124,9 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
     var errResponses = [];
     for (const i in proposalResponses) {
       if (proposalResponses[i] instanceof Error) {
+        // increase counter
+        errorRequestCounter.inc();
+
         all_good = false;
         error_message = util.format('invoke chaincode proposal resulted in an error :: %s', proposalResponses[i].toString());
         logger.error(error_message);
@@ -128,9 +146,13 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
           logger.error('error: ', objErr);
           logger.error('error: ', err);
         }
+
       } else if (proposalResponses[i].response && proposalResponses[i].response.status === 200) {
         logger.info('invoke chaincode proposal was good');
       } else {
+        // increase counter
+        errorRequestCounter.inc();
+
         all_good = false;
         error_message = util.format('invoke chaincode proposal failed for an unknown reason %j', proposalResponses[i]);
         logger.error(error_message);
@@ -282,7 +304,7 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
   var obj = results[0][0].response
   try {
     obj.payload = JSON.parse(obj.payload.toString('utf8'));
-  } catch(e) {
+  } catch (e) {
     obj.payload = obj.payload.toString('utf8');
   }
   let result = {
