@@ -30,14 +30,12 @@ const sendTransactionHistogram = new promClient.Histogram({
 
 const errorRequestCounter = new promClient.Counter({
   name: 'akc_error_request_counter',
-  help: 'Counter of error requests',
-  labelNames: ['channel', 'chaincode', 'function']
+  help: 'Counter of error requests'
 });
 
 const requestCounter = new promClient.Counter({
   name: 'akc_request_counter',
-  help: 'Counter of requests',
-  labelNames: ['channel', 'chaincode', 'function']
+  help: 'Counter of requests'
 });
 
 const invokeChaincode = async function (peerNames, channelName, chaincodeName, fcn, args, username, org_name) {
