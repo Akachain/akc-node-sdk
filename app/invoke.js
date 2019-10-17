@@ -29,12 +29,12 @@ const sendTransactionHistogram = new promClient.Histogram({
 });
 
 const errorRequestCounter = new promClient.Counter({
-  name: 'akc_error_request_counter',
+  name: 'akc_error_request_count',
   help: 'Counter of error requests'
 });
 
 const requestCounter = new promClient.Counter({
-  name: 'akc_request_counter',
+  name: 'akc_request_count',
   help: 'Counter of requests'
 });
 
