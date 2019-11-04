@@ -241,7 +241,9 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
     error_message = error.toString();
   } finally {
     if (channel) {
-      channel.close();
+      // We don't close channel here 
+      // TODO: add case where channel fail
+      // channel.close();
     }
   }
   let success = true;

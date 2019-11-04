@@ -8,9 +8,9 @@ const getClient = async (orgName, username) => {
 
   const strOrgName = orgName || ORG_NAME;
 
-  if (strOrgName != ORG_NAME) {
-    return await helper.getClientForOrg(strOrgName, username);
-  }
+  // if (strOrgName != ORG_NAME) {
+  //   return await helper.getClientForOrg(strOrgName, username);
+  // }
 
   if (CLIENT) {
     return CLIENT;
@@ -23,10 +23,10 @@ const getClient = async (orgName, username) => {
 const getChannel = async (orgName, username, channelName) => {
   const strOrgName = orgName || ORG_NAME;
 
-  if (strOrgName != ORG_NAME) {
-    const client = await helper.getClientForOrg(strOrgName, username);
-    return client.getChannel(channelName);
-  }
+  // if (strOrgName != ORG_NAME) {
+  //   const client = await helper.getClientForOrg(strOrgName, username);
+  //   return client.getChannel(channelName);
+  // }
 
   if (CHANNEL) {
     return CHANNEL;
