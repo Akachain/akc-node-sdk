@@ -53,18 +53,10 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
   let channel = null;
   try {
     // first setup the client for this org
-
-    var getClientStart = process.hrtime();
     client = await common.getClient(org_name, username)
-    var getClientEnd = process.hrtime(getClientStart)
-    logger.info('getClient time (hr): %ds %dms', getClientEnd[0], getClientEnd[1] / 1000000)
-
 
     logger.debug('Successfully got the fabric client for the organization "%s"', org_name);
-    var getChannelStart = process.hrtime();
     channel = await common.getChannel(org_name, username, channelName);
-    var getChannelEnd = process.hrtime(getChannelStart);
-    logger.info('getChannel time (hr): %ds %dms', getChannelEnd[0], getChannelEnd[1] / 1000000)
 
     if (!channel) {
       let message = util.format('Channel %s was not defined in the connection profile', channelName);
@@ -72,16 +64,12 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
       throw new Error(message);
     }
 
-    var newTransactionIDStart = process.hrtime();
     const tx_id = client.newTransactionID();
-    var newTransactionIDEnd = process.hrtime(newTransactionIDStart);
-    logger.info('newTransactionID time (hr): %ds %dms', newTransactionIDEnd[0], newTransactionIDEnd[1] / 1000000)
-
     // will need the transaction ID string for the event registration later
     tx_id_string = tx_id.getTransactionID();
 
     // we want to choose the endorsing peer in sequence 
-    let round = 0;
+    // let round = 0;
 
     // send proposal to endorser
     const request = {
@@ -96,19 +84,14 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
     // start timer send transaction
     const sendProposalHistogramTimer = sendProposalHistogram.startTimer();
 
-    var hrstart = process.hrtime()
     var results = await channel.sendTransactionProposal(request);
-    var hrend = process.hrtime(hrstart)
-    logger.info('Send proposal time to %s (hr): %ds %dms', results[0][0].peer.name, hrend[0], hrend[1] / 1000000)
-
-    // end timer
+    
+    // end send proposal timer
     sendProposalHistogramTimer({
       channel: channelName,
       chaincode: chaincodeName,
       function: fcn
     });
-
-    var checkProposalStart = process.hrtime()
 
     // the returned object has both the endorsement results
     // and the actual proposal, the proposal will be needed
@@ -219,15 +202,10 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
       // are ready for the orderering and committing
       promises.push(sendPromise);
 
-      var checkProposalEnd = process.hrtime(checkProposalStart);
-      logger.info('Check proposal time: %ds %dms', checkProposalEnd[0], checkProposalEnd[1] / 1000000);
 
       // start timer send transaction
-      var txstart = process.hrtime();
       const sendTransactionTimer = sendTransactionHistogram.startTimer();
       var resultsPromise = await Promise.all(promises);
-      var txend = process.hrtime(txstart);
-      logger.info('Send tx time (hr): %ds %dms', txend[0], txend[1] / 1000000);
 
       // end timer
       sendTransactionTimer({
@@ -263,7 +241,9 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
     error_message = error.toString();
   } finally {
     if (channel) {
-      channel.close();
+      // We don't close channel here 
+      // TODO: add case where channel fail
+      // channel.close();
     }
   }
   let success = true;
