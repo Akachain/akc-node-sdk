@@ -1,8 +1,8 @@
 {
-  "name": "akc-node-sdk",
+  "name": "@Akachain/akc-node-sdk",
   "author": "hoangnh",
-  "version": "1.2.1c",
-  "description": "A node.js SDK",
+  "version": "v2.0.0",
+  "description": "AKC node.js SDK for Decentralized Application to connect to Fabric Peers",
   "main": "index.js",
   "scripts": {},
   "keywords": [],
@@ -13,5 +13,7 @@
     "js-sha256": "^0.9.0",
     "log4js": "^4.4.0",
     "prom-client": "^11.5.0"
-  }
+  },
+  "publishConfig": { "registry": "https://npm.pkg.github.com/" },
+  "repository": "git://github.com/Akachain/akc-node-sdk.git"
 }
