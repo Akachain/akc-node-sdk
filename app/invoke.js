@@ -269,8 +269,8 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
           Status: 202,
           Payload: ""
         },
-        Message: errResponses,
-        MessageDetail: errResponses,
+        Message: error_message,
+        MessageDetail: error_message,
       };
     }
   } else {
