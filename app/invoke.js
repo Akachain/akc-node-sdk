@@ -38,14 +38,14 @@ const requestCounter = new promClient.Counter({
   help: 'Counter of requests'
 });
 
-const invokeChaincode = async function (peerNames, channelName, chaincodeName, fcn, args, username, org_name) {
+const invokeChaincode = async function (peerNames, channelName, chaincodeName, fcn, args, orgName, userName) {
   // increase req counter
   requestCounter.inc();
 
   // start timer send transaction total
   const sendTransactionTotalHistogramTimer = sendTransactionTotalHistogram.startTimer();
 
-  console.log(peerNames, channelName, chaincodeName, fcn, args, username, org_name);
+  console.log(peerNames, channelName, chaincodeName, fcn, args, orgName, userName);
   logger.debug(util.format('\n============ invoke transaction on channel %s ============\n', channelName));
   let error_message = null;
   let tx_id_string = null;
@@ -53,10 +53,10 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
   let channel = null;
   try {
     // first setup the client for this org
-    client = await common.getClient(org_name, username)
+    client = await common.getClient(orgName, userName)
 
-    logger.debug('Successfully got the fabric client for the organization "%s"', org_name);
-    channel = await common.getChannel(org_name, username, channelName);
+    logger.debug('Successfully got the fabric client for the organization "%s"', orgName);
+    channel = await common.getChannel(orgName, userName, channelName);
 
     if (!channel) {
       let message = util.format('Channel %s was not defined in the connection profile', channelName);
@@ -249,7 +249,7 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
   let success = true;
   let message = util.format(
     'Successfully invoked the chaincode %s to the channel \'%s\' for transaction ID: %s',
-    org_name, channelName, tx_id_string);
+    orgName, channelName, tx_id_string);
   if (error_message) {
     message = util.format('Failed to invoke chaincode. cause:%s', error_message);
     success = false;
