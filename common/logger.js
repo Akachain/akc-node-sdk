@@ -23,7 +23,7 @@ log4js.configure({
   },
 });
 
-let logger = log4js.getLogger();
+let logger = log4js.getLogger('akc-node-sdk');
 logger.level = 'debug';
 
 /**

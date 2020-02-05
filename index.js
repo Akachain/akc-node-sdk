@@ -11,123 +11,117 @@ const _crawlBlock = require('./common/crawlBlock');
  * @param {*} chaincodeName 
  * @param {*} fcn 
  * @param {*} args 
- * @param {*} username 
- * @param {*} org_name 
+ * @param {*} userName 
+ * @param {*} orgName 
  */
-const invoke = async (peerNames, channelName, chaincodeName, fcn, args, username, org_name) => {
-  return await _invoke.invokeChaincode(peerNames, channelName, chaincodeName, fcn, args, username, org_name);
+const invoke = async (peerNames, channelName, chaincodeName, fcn, args, orgName, userName) => {
+  return await _invoke.invokeChaincode(peerNames, channelName, chaincodeName, fcn, args, orgName, userName);
 };
 
 /**
- * query transaction
+ * Query transaction
+ * @param {*} peerNames 
  * @param {*} channelName 
  * @param {*} chaincodeName 
- * @param {*} args 
  * @param {*} fcn 
- * @param {*} org_name 
+ * @param {*} args 
+ * @param {*} orgName 
+ * @param {*} userName 
  */
-const query = async (channelName, chaincodeName, args, fcn, org_name) => {
-  return await _query.queryChaincode(channelName, chaincodeName, args, fcn, org_name);
+const query = async (peerNames, channelName, chaincodeName, fcn, args, orgName, userName) => {
+  return await _query.queryChaincode(peerNames, channelName, chaincodeName, fcn, args, orgName, userName);
 };
 
 /**
- * 
+ * Get block's information by blockNumber
  * @param {*} peer 
  * @param {*} channelName 
  * @param {*} blockNumber 
- * @param {*} username 
- * @param {*} org_name 
+ * @param {*} orgName 
+ * @param {*} userName 
  */
-const getBlockByNumber = async (peer, channelName, blockNumber, username, org_name) => {
-  return await _query.getBlockByNumber(peer, channelName, blockNumber, username, org_name);
+const getBlockByNumber = async (peer, channelName, blockNumber, orgName, userName) => {
+  return await _query.getBlockByNumber(peer, channelName, blockNumber, orgName, userName);
 };
 
 /**
- * 
+ * Get transaction's information by trxnID (transaction ID)
  * @param {*} peer 
  * @param {*} channelName 
  * @param {*} trxnID 
- * @param {*} username 
- * @param {*} org_name 
+ * @param {*} userName 
+ * @param {*} orgName 
  */
-const getTransactionByID = async (peer, channelName, trxnID, username, org_name) => {
-  return await _query.getTransactionByID(peer, channelName, trxnID, username, org_name);
+const getTransactionByID = async (peer, channelName, trxnID, orgName, userName) => {
+  return await _query.getTransactionByID(peer, channelName, trxnID, orgName, userName);
 };
 
 /**
- * 
+ * Get block's information by blockHash
  * @param {*} peer 
  * @param {*} channelName 
  * @param {*} hash 
- * @param {*} username 
- * @param {*} org_name 
+ * @param {*} orgName 
+ * @param {*} userName 
  */
-const getBlockByHash = async (peer, channelName, hash, username, org_name) => {
-  return await _query.getBlockByHash(peer, channelName, hash, username, org_name);
+const getBlockByHash = async (peer, channelName, hash, orgName, userName) => {
+  return await _query.getBlockByHash(peer, channelName, hash, orgName, userName);
 };
 
 /**
- * 
+ * Get block's information by blockHash
  * @param {*} peer 
  * @param {*} channelName 
- * @param {*} username 
- * @param {*} org_name 
+ * @param {*} userName 
+ * @param {*} orgName 
  */
-const getChainInfo = async (peer, channelName, username, org_name) => {
-  return await _query.getChainInfo(peer, channelName, username, org_name);
+const getChainInfo = async (peer, channelName, orgName, userName) => {
+  return await _query.getChainInfo(peer, channelName, orgName, userName);
 };
 
 /**
- * 
+ * Queries the ledger on the target peer for instantiated chaincodes on this channel
  * @param {*} peer 
  * @param {*} channelName 
  * @param {*} type 
- * @param {*} username 
- * @param {*} org_name 
+ * @param {*} orgName 
+ * @param {*} userName 
  */
-const getInstalledChaincodes = async (peer, channelName, type, username, org_name) => {
-  return await _query.getInstalledChaincodes(peer, channelName, type, username, org_name);
+const getInstalledChaincodes = async (peer, channelName, type, orgName, userName) => {
+  return await _query.getInstalledChaincodes(peer, channelName, type, orgName, userName);
 };
 
 /**
- * 
+ * Queries the target peer for the names of all the channels that a peer has joined
  * @param {*} peer 
- * @param {*} username 
- * @param {*} org_name 
+ * @param {*} userName 
+ * @param {*} orgName 
  */
-const getChannels = async (peer, username, org_name) => {
-  return await _query.getChannels(peer, username, org_name);
+const getChannels = async (peer, orgName, userName) => {
+  return await _query.getChannels(peer, orgName, userName);
 };
 
 /**
- * 
- * @param {*} userorg 
- * @param {*} username 
+ * Get an instance of client initialized with the network end points
+ * @param {*} orgName 
+ * @param {*} userName 
  */
-const getClientForOrg = async (userorg, username) => {
-  return await _client.getClientForOrg(userorg, username);
+const getClientForOrg = async (orgName, userName) => {
+  return await _client.getClientForOrg(orgName, userName);
 };
 
 /**
- * 
- * @param {*} username 
+ * Register a new user and return the enrollment secret
+ * @param {*} userName 
  * @param {*} userOrg 
  * @param {*} isJson 
  */
-const registerUser = async (username, userOrg, isJson) => {
-  return await _client.registerUser(username, userOrg, isJson);
+const registerUser = async (userName, userOrg, isJson) => {
+  return await _client.registerUser(userName, userOrg, isJson);
 };
 
 /**
- * 
- * @param {*} client 
- */
-const tlsEnroll = async (client) => {
-  return await _client.tlsEnroll(client);
-};
-
-/**
- * set file path of log file
+ * Set file path of log file
  * @param {*} file_path 
  */
 const setFilePath = async (file_path) => {
@@ -135,7 +129,7 @@ const setFilePath = async (file_path) => {
 };
 
 /**
- * set logger module name
+ * Set logger module name
  * @param {*} moduleName 
  */
 const getLogger = (moduleName) => {
@@ -143,7 +137,7 @@ const getLogger = (moduleName) => {
 };
 
 /**
- * get data block
+ * Get data block
  * @param {*} blockNumberOrHash 
  * @param {*} option 
  */
@@ -162,7 +156,6 @@ module.exports = {
   getChannels,
   getClientForOrg,
   registerUser,
-  tlsEnroll,
   setFilePath,
   getLogger,
   crawlBlock

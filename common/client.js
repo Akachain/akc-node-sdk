@@ -10,66 +10,68 @@ const loggerCommon = require('./logger');
 const logger = loggerCommon.getLogger('client');
 hfc.setLogger(logger);
 
-async function getClientForOrg(userorg, username) {
-  logger.debug('getClientForOrg - ****** START %s %s', userorg, username);
+// Get an instance of client initialized with the network end points
+async function getClientForOrg(userorg, userName) {
+  logger.debug('getClientForOrg - ****** START %s %s', userorg, userName);
   const config = '-connection-profile-path';
 
   const client = hfc.loadFromConfig(hfc.getConfigSetting(`network${config}`));
   client.loadFromConfig(hfc.getConfigSetting(userorg + config));
 
   await client.initCredentialStores();
-  if (username) {
-    const user = await client.getUserContext(username, true);
+  if (userName) {
+    const user = await client.getUserContext(userName, true);
     if (!user) {
-      throw new Error(util.format('User was not found :', username));
+      throw new Error(util.format('User was not found :', userName));
     } else {
-      logger.debug('User %s was found to be registered and enrolled', username);
+      logger.debug('User %s was found to be registered and enrolled', userName);
     }
   }
-  logger.debug('getClientForOrg - ****** END %s %s \n\n', userorg, username);
+  logger.debug('getClientForOrg - ****** END %s %s \n\n', userorg, userName);
 
   return client;
 }
 
-async function registerUser(username, userOrg, isJson) {
+// Register a new user and return the enrollment secret
+async function registerUser(userName, userOrg, isJson) {
   try {
     const fabricClient = await getClientForOrg(userOrg);
     // client can now act as an agent for organization Org1
     // first check to see if the user is already enrolled
-    let user = await fabricClient.getUserContext(username, true);
+    let user = await fabricClient.getUserContext(userName, true);
     if (user && user.isEnrolled()) {
       logger.info('Successfully loaded member from persistence');
     } else {
       // user was not enrolled, so we will need an admin user object to register
-      logger.info('User %s was not enrolled, so we will need an admin user object to register', username);
+      logger.info('User %s was not enrolled, so we will need an admin user object to register', userName);
       // var admins = hfc.getConfigSetting('admins');
       const caClient = fabricClient.getCertificateAuthority();
       const admins = caClient.getRegistrar();
       const adminUserObj = await fabricClient.setUserContext({
-        username: admins[0].enrollId,
+        userName: admins[0].enrollId,
         password: admins[0].enrollSecret,
       });
       const secret = await caClient.register({
-        enrollmentID: username,
+        enrollmentID: userName,
         affiliation: `${userOrg.toLowerCase()}.department1'`,
       }, adminUserObj);
-      logger.info('Successfully got the secret for user %s', username);
-      user = await fabricClient.setUserContext({ username, password: secret });
-      logger.debug('Successfully enrolled username %s  and setUserContext on the client object', username);
+      logger.info('Successfully got the secret for user %s', userName);
+      user = await fabricClient.setUserContext({ userName, password: secret });
+      logger.debug('Successfully enrolled userName %s  and setUserContext on the client object', userName);
     }
     if (user && user.isEnrolled) {
       if (isJson && isJson === true) {
         const response = {
           success: true,
-          message: `${username} enrolled Successfully`,
+          message: `${userName} enrolled Successfully`,
         };
         return response;
       }
-      return `${username} enrolled Successfully`;
+      return `${userName} enrolled Successfully`;
     }
     throw new Error('User was not enrolled ');
   } catch (error) {
-    logger.error('Failed to get registered user: %s with error: %s', username, error.toString());
+    logger.error('Failed to get registered user: %s with error: %s', userName, error.toString());
     return `failed ${error.toString()}`;
   }
 }
