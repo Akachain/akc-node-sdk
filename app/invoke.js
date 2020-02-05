@@ -45,7 +45,6 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
   // start timer send transaction total
   const sendTransactionTotalHistogramTimer = sendTransactionTotalHistogram.startTimer();
 
-  console.log(peerNames, channelName, chaincodeName, fcn, args, orgName, userName);
   logger.debug(util.format('\n============ invoke transaction on channel %s ============\n', channelName));
   let error_message = null;
   let tx_id_string = null;
