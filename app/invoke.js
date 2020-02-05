@@ -278,7 +278,7 @@ const invokeChaincode = async function (peerNames, channelName, chaincodeName, f
   }
 
   // build a response to send back to the REST caller
-  logger.debug("RESPONSE DATA: ", results[0][0].response.toString())
+  logger.debug("RESPONSE DATA: ", results[0][0].response)
   var obj = results[0][0].response
   try {
     obj.payload = JSON.parse(obj.payload.toString('utf8'));
