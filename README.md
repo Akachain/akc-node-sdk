@@ -27,7 +27,7 @@ npm install fabric-ca-client
     Access to [gibhub](https://github.com), choose [settings](https://github.com/settings/profile) at right-top of page. Click on _Developer settings_, _Personal access tokens_ then generate your token. Copy it to replace your_token in the following command
     ```js
     // Linux/MacOS command
-    echo "//npm.pkg.github.com/:_authToken=your_token"
+    echo "//npm.pkg.github.com/:_authToken=your_token" >> .npmrc
     ```
 
 3. Installation is done using the
