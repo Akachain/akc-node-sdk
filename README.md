@@ -53,17 +53,20 @@ const invokeResult = await akcSdk.invoke(peerNames, channelName, chaincodeName, 
 ### Functions
 | Function | Parameters | Note |
 | --- | --- | --- |
+| `registerUser` | user: { orgname, username, enrollmentSecret (optional), role (optional), affiliation (optional), maxEnrollments (optional), attrs (optional) } | |
+| `enrollUser` | user: { orgname, username } | |
+| `tlsEnroll` | client | |
+| `getClientForOrg` | orgName, isRefresh (optional)| |
+| `getChannels` | orgName, channelName, isRefresh (optional)| |
 | `invoke` | peerNames, channelName, chaincodeName, fcn, args, orgName, userName | |
 | `query` | peerNames, channelName, chaincodeName, fcn, args, orgName, userName | |
-| `getBlockByNumber` | peer, channelName, blockNumber, orgName, userName | |
-| `getTransactionByID` | peer, channelName, trxnID, orgName, userName | |
-| `getBlockByHash` | peer, channelName, hash, orgName, userName | |
-| `getChainInfo` | peer, channelName, orgName, userName | |
-| `getInstalledChaincodes` | peer, channelName, type, orgName, userName | |
-| `getChannels` | peer, orgName, userName | |
-| `getClientForOrg` | userorg, userName | |
-| `registerUser` | userName, userOrg, isJson | |
-| `tlsEnroll` | client | |
-| `setFilePath` | file_path | set path of log file before use getLogger() function (default: './logs/') |
+| `getBlockByNumber` | peerName, channelName, blockNumber, orgName, userName | |
+| `getTransactionByID` | peerName, channelName, trxnID, orgName, userName | |
+| `getBlockByHash` | peerName, channelName, hash, orgName, userName | |
+| `getChainInfo` | peerName, channelName, orgName, userName | |
+| `getInstalledChaincodes` | peerName, channelName, type, orgName, userName | |
 | `getLogger` | moduleName | |
 | `crawlBlock` | blockNumberOrHash, option | |
+| `installChaincode` | orgName, request: { chaincodePath, chaincodeId, metadataPath, chaincodeVersion, chaincodeType } | |
+| `initChaincode` | orgName, channelName, request: { chaincodeId, chaincodeVersion, chaincodeType, args } | |
+| `upgradeChaincode` | orgName, channelName, request { chaincodeId, chaincodeVersion, chaincodeType, args } | |
