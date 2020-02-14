@@ -56,8 +56,8 @@ const invokeResult = await akcSdk.invoke(peerNames, channelName, chaincodeName, 
 | `registerUser` | user: { orgname, username, enrollmentSecret (optional), role (optional), affiliation (optional), maxEnrollments (optional), attrs (optional) } | |
 | `enrollUser` | user: { orgname, username } | |
 | `tlsEnroll` | client | |
-| `getClientForOrg` | orgName, isRefresh (optional)| |
-| `getChannels` | orgName, channelName, isRefresh (optional)| |
+| `getClientForOrg` | orgName, userName (optional), isRefresh (optional)| |
+| `getChannel` | orgName, userName (optional), channelName, isRefresh (optional)| |
 | `invoke` | peerNames, channelName, chaincodeName, fcn, args, orgName, userName | |
 | `query` | peerNames, channelName, chaincodeName, fcn, args, orgName, userName | |
 | `getBlockByNumber` | peerName, channelName, blockNumber, orgName, userName | |
