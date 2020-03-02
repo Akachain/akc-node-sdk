@@ -34,7 +34,7 @@ npm install fabric-ca-client
 [`npm install` command](https://docs.npmjs.com/getting-started/installing-npm-packages-locally):
 
     ```bash
-    npm install @akachain/hstx-node-sdk
+    npm install @akachain/akc-node-sdk
     ```
 
 
