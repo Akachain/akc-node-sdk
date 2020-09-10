@@ -1,7 +1,7 @@
 {
   "name": "@akachain/akc-node-sdk",
   "author": "hoangnh, hongsongp97, longnh, hainq, huanlv",
-  "version": "v2.1.8",
+  "version": "v2.1.9-a",
   "description": "AKC node.js SDK for Decentralized Application to connect to Fabric Peers",
   "main": "index.js",
   "scripts": {},
